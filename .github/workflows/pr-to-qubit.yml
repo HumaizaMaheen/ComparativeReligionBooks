@@ -1,0 +1,24 @@
+name: Send PR to Qubit Controller
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  notify-qubit-controller:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send PR data
+        run: |
+          curl -X POST "${{ secrets.QUBIT_CONTROLLER_URL }}/github/pr" \
+          -H "Content-Type: application/json" \
+          -H "Authorization: Bearer ${{ secrets.QUBIT_CONTROLLER_SECRET }}" \
+          -d '{
+            "githubUsername": "${{ github.event.pull_request.user.login }}",
+            "githubProfile": "https://github.com/${{ github.event.pull_request.user.login }}",
+            "prNumber": ${{ github.event.pull_request.number }},
+            "prUrl": "${{ github.event.pull_request.html_url }}",
+            "repo": "${{ github.repository }}",
+            "createdAt": "${{ github.event.pull_request.created_at }}"
+          }'
